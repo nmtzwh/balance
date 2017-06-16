@@ -1,0 +1,160 @@
+#form-wrapper {
+	/*background-color:rgba(72,72,72,0.4);*/
+	/*padding-left:35px;
+	padding-right:35px;
+	padding-top:35px;
+	padding-bottom:50px;*/
+	width: 100%;
+  color:#eeeeee;
+	/*float: left;*/
+	/*left: 10%;*/
+	/*position: absolute;*/
+  /*margin-top:30px;*/
+	/*margin-left: -260px;*/
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+}
+
+.input-field input, select {
+	color:#3c3c3c;
+	font-family: Helvetica, Arial, sans-serif;
+  font-weight:500;
+	font-size: 15px;
+	border-radius: 0;
+	line-height: 15px;
+	background-color: #fbfbfb;
+	padding: 5px 5px 5px 5px;
+	margin-bottom: 15px;
+	width:100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+  border: 3px solid rgba(55,123,168,0.5);
+}
+
+.input-field input:focus, select:focus{
+	background: #fff;
+	box-shadow: 0;
+	border: 3px solid #377BA8;
+	color: #377BA8;
+	outline: none;
+  padding: 5px 5px 5px 5px;
+}
+
+.focused{
+	color:#377BA8;
+	border:#377BA8 solid 3px;
+}
+
+
+/*#comment{
+	background-image: url(http://rexkirby.com/kirbyandson/images/comment.svg);
+	background-size: 30px 30px;
+	background-position: 11px 8px;
+	background-repeat: no-repeat;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    line-height: 150%;
+    resize:vertical;
+}*/
+
+input:hover, textarea:hover,
+input:focus, textarea:focus {
+	background-color:white;
+}
+
+.input-button input{
+	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	float:left;
+	width: 100%;
+	border: #fbfbfb solid 4px;
+	cursor:pointer;
+	background-color: #377BA8;
+	color:white;
+	font-size:24px;
+	padding-top:22px;
+	padding-bottom:22px;
+	-webkit-transition: all 0.3s;
+	-moz-transition: all 0.3s;
+	transition: all 0.3s;
+  margin-top:-4px;
+  font-weight:700;
+}
+
+.input-button input:hover{
+	background-color: rgba(0,0,0,0);
+	color: #377BA8;
+}
+
+.input-button:hover {
+	color: #377BA8;
+}
+
+input[type="radio"] { width: 10px; }
+
+/*http://code.stephenmorley.org/html-and-css/styling-checkboxes-and-radio-buttons/*/
+
+input[type=radio   ]:not(old){
+  width     : 2em;
+  margin    : 0;
+  padding   : 0;
+  font-size : 1em;
+  opacity   : 0;
+}
+input[type=radio   ]:not(old) + label{
+  display      : inline-block;
+  margin-left  : -2em;
+  line-height  : 1.5em;
+}
+input[type=radio   ]:not(old) + label > span{
+  display          : inline-block;
+  width            : 0.875em;
+  height           : 0.875em;
+  margin           : 0.25em 0.5em 0.25em 0.25em;
+  border           : 0.0625em solid rgb(192,192,192);
+  border-radius    : 0.25em;
+  background       : rgb(224,224,224);
+  background-image :    -moz-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image :     -ms-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image :      -o-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image : -webkit-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image :         linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  vertical-align   : bottom;
+}
+input[type=radio   ]:not(old):checked + label > span{
+  background-image :    -moz-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image :     -ms-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image :      -o-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image : -webkit-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image :         linear-gradient(rgb(224,224,224),rgb(240,240,240));
+}
+
+input[type=radio]:not(old):checked + label > span > span{
+  display          : block;
+  width            : 0.5em;
+  height           : 0.5em;
+  margin           : 0.125em;
+  border           : 0.0625em solid rgb(115,153,77);
+  border-radius    : 0.125em;
+  background       : rgb(153,204,102);
+  background-image :    -moz-linear-gradient(rgb(179,217,140),rgb(153,204,102));
+  background-image :     -ms-linear-gradient(rgb(179,217,140),rgb(153,204,102));
+  background-image :      -o-linear-gradient(rgb(179,217,140),rgb(153,204,102));
+  background-image : -webkit-linear-gradient(rgb(179,217,140),rgb(153,204,102));
+  background-image :         linear-gradient(rgb(179,217,140),rgb(153,204,102));
+}
+
+input[type=radio]:not(old):checked + label {
+  color: rgb(153,204,102);
+}
+
+
+@media only screen and (max-width: 768px) {
+  .input-field input, select {
+  	margin-bottom: 5px;
+  }
+}
