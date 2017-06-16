@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import json
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
@@ -8,9 +9,9 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     db = get_db()
-    cur = db.execute('select id, date, cost, person from data order by id desc')
+    cur = db.execute('select id, date, cost, share, person from data order by id desc')
     entries = cur.fetchall()
-    return render_template('index.html', entries=entries)
+    return render_template('index.html', entries=entries, data=json.dumps([tuple(row) for row in entries]))
 
 @app.route('/add', methods=['POST'])
 def addCost():
