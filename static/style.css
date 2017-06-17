@@ -65,12 +65,33 @@ h2              { font-size: 1.2em; }
   background-color: #cccccc;
 }
 
-.chart rect {
-  fill: steelblue;
+#personly rect {
+  fill: LightSkyBlue;
+}
+
+#monthly rect {
+  fill: HotPink;
+}
+
+#weekly rect {
+  fill: #76eec6;
 }
 
 .chart text {
   fill: white;
   font: 10px sans-serif;
   text-anchor: end;
+}
+
+hr {
+  border-color: #ccc;
+  background-color: #ccc;
+}
+
+.calculator_display  input, .calculator_display  select, .calculator_display  label{
+  margin-top: 0.5em;
+}
+
+.formBlock {
+  display: block;
 }

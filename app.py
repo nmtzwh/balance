@@ -94,6 +94,12 @@ def deleteEntry(id):
     flash('Entry deleted!')
     return redirect(url_for('index'))
 
+@app.route('/summary')
+def displaySummary():
+    db = get_db()
+    cur = db.execute('select id, date, cost, share, person from data order by id desc')
+    entries = cur.fetchall()
+    return render_template('summary.html', data=json.dumps([tuple(row) for row in entries]))
 
 
 # database
