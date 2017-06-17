@@ -51,7 +51,7 @@ def detailPage(id):
     cur = db.execute('select * from data where id = ?', [id])
     entry = cur.fetchall()
     cur.close()
-    print(entry[0]['id'])
+    # print(entry[0]['id'])
     return render_template('details.html', entries=entry)
 
 @app.route('/change', methods=['POST'])
@@ -68,7 +68,7 @@ def changeOneEntry():
                       request.form['share'],
                       request.form['user'],
                       request.form['id']]
-        print(dataValues)
+        # print(dataValues)
         query = 'UPDATE data SET %s WHERE %s' % (
             '=?, '.join(dataFields) + '=?',
             'id=?'
