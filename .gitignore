@@ -6,3 +6,5 @@ database*
 *.zip
 *.out
 *.bak
+*.log
+*.sock
