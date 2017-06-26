@@ -1,4 +1,4 @@
-from app import app
+from balance import app
 
 if __name__ == '__main__':
     app.run()
