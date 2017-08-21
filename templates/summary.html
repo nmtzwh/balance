@@ -1,0 +1,303 @@
+<!doctype html>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='simplegrid.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='form.css') }}"> -->
+
+<title>Where Money Goes</title>
+
+<div class=page>
+  <h1>WhereMoneyGoes</h1>
+  <div class=metanav id="list_entries">
+    <button type="button" id="backBtn">Back</button>
+    <!-- <a href="{{ url_for('addCost') }}">add</a> -->
+  </div>
+  {% for message in get_flashed_messages() %}
+  <div class=flash>{{ message }}</div>
+  {% endfor %}
+
+  <div class="chart_display">
+    <h2>Monthly summary</h2>
+    <svg class="chart" id="monthly"></svg>
+    <hr/>
+  </div>
+
+  <div class="chart_display">
+    <h2>Weekly summary</h2>
+    <svg class="chart" id="weekly"></svg>
+    <hr/>
+  </div>
+
+  <div class="chart_display">
+    <h2>Person summary</h2>
+    <svg class="chart" id="personly"></svg>
+    <hr/>
+  </div>
+
+  <div class="calculator_display">
+    <h2>Calculator</h2>
+    <div class="formBlock">
+      <input type="date" name="dateStart" placeholder="Start" id="id_start_date" />
+      <input type="date" name="dateEnd" placeholder="End" id="id_end_date" />
+    </div>
+
+    <div class="formBlock">
+      <select name="share" id="id_share">
+      <option value=2>All</option>
+      <option value=1>Private</option>
+      <option value=0 selected>Share</option>
+    </select>
+      <select name="person" id="id_person">
+      <option value=2>ZENG</option>
+      <option value=1>PAN</option>
+      <option value=0 selected>All</option>
+    </select>
+    </div>
+    <div class="formBlock">
+      <label for="id_threshold">Threshold</label>
+      <input type="number" name="threshold" placeholder="threshold" id="id_threshold" />
+    </div>
+    <div class="formBlock">
+      <label for="id_result">Result</label>
+      <input type="number" name="result" placeholder="Result" id="id_result" />
+      <button type="button" id="calBtn">Calculate</button>
+    </div>
+
+
+    <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+      // data visualization
+      var entries = {{ data | safe }};
+
+      // -----------------------------------------------------------------------
+      // get monthly/weekly data
+
+      // get date from string for most browsers
+      function parseStringDate(strDate){
+        var dateSplit = strDate.split(/[- :]/);
+        return new Date(dateSplit[0], dateSplit[1]-1, dateSplit[2]).getTime();
+      }
+
+      // sum in between dates
+      Array.prototype.sumBetween = function(start, end, shareOnly = 0, threshold = Number.MAX_VALUE, person = 0) {
+        var total = 0.;
+        for (var i = 0; i < this.length; i++) {
+          var tempValue = Number(this[i][2]);
+          var tempDate = parseStringDate(this[i][1]);
+          // continue if date Invalid
+          if (tempDate < start || tempDate >= end || tempValue > threshold) {
+            continue;
+          }
+          // add value by conditions
+          if (shareOnly == 0 && this[i][3] == "共享") { // 0: shareOnly; 1: privateOnly; 2: all.
+            total += tempValue;
+            // if person is selected
+            if (person == 1) { // PAN = 1 , ZENG = 2
+              total -= this[i][4] == "user0" ? tempValue : 0.;
+            } else if (person == 2) {
+              total -= this[i][4] == "user0" ? 0 : tempValue;
+            }
+          } else if (shareOnly == 1 && this[i][3] == "独享") {
+            total += tempValue;
+            // if person is selected
+            if (person == 1) { // PAN = 1 , ZENG = 2
+              total -= this[i][4] == "user0" ? tempValue : 0.;
+            } else if (person == 2) {
+              total -= this[i][4] == "user0" ? 0 : tempValue;
+            }
+          } else if (shareOnly == 2) {
+            total += tempValue;
+            // if person is selected
+            if (person == 1) { // All = 0, PAN = 1 , ZENG = 2
+              total -= this[i][4] == "user0" ? tempValue : 0.;
+            } else if (person == 2) {
+              total -= this[i][4] == "user0" ? 0 : tempValue;
+            }
+          }
+
+        }
+        return total;
+      }
+      Array.prototype.sumMonthly = function() {
+        var monthStart = 3;
+        var dateEnd = new Date().getTime();
+        var data = [0.],
+          name = ['Avg.'],
+          nMonth = 0;
+        // loop thru months
+        var total = 0.;
+        while (true) {
+          var tStart = new Date(2017, monthStart, 1).getTime();
+          monthStart += 1;
+          var tEnd = new Date(2017, monthStart, 1).getTime();
+          if (dateEnd < tStart) {
+            break;
+          }
+          // use the function above
+          var tempTotal = this.sumBetween(tStart, tEnd);
+          data.push(tempTotal);
+          name.push('Mon.' + monthStart.toString());
+          nMonth += 1;
+          total += tempTotal;
+        }
+        data[0] = total / nMonth;
+        return [data, name];
+      };
+
+      Array.prototype.sumWeekly = function() {
+        // start from Saturday
+        var dateStart = new Date(2017, 3, 8);
+        var dateEnd = new Date().getTime();
+        var data = [0.],
+            name = ['Avg.'],
+            nWeek = 0;
+        // loop thru months
+        var total = 0.;
+        while (true) {
+          var tStart = dateStart.getTime();
+          dateStart.setDate(dateStart.getDate() + 7);
+          var tEnd = dateStart.getTime();
+          if (dateEnd < tStart) {
+            console.log(tStart);
+            console.log(dateEnd);
+            break;
+          }
+          // use the function above
+          var tempTotal = this.sumBetween(tStart, tEnd, 0, 200.);
+          data.push(tempTotal);
+          name.push('Week.' + nWeek.toString());
+          nWeek += 1;
+          total += tempTotal;
+        }
+        data[0] = total / nWeek;
+        return [data, name];
+      };
+
+
+
+
+      // get person total
+      var dataPerson = [0, 0, 0, 0];
+      var namePerson = ['ShaP', 'ShaZ', 'PriP', 'PriZ'];
+
+      for (var entry of entries) {
+        // console.log(entry);
+        if (entry[3] == "共享") {
+          if (entry[4] == "user1") {
+            dataPerson[0] += Number(entry[2]);
+          } else {
+            dataPerson[1] += Number(entry[2]);
+          }
+        } else {
+          if (entry[4] == "user1") {
+            dataPerson[2] += Number(entry[2]);
+          } else {
+            dataPerson[3] += Number(entry[2]);
+          }
+        }
+      }
+
+      // basic settings of d3 charts
+      var leftWidth = 50,
+        width = document.getElementById('list_entries').offsetWidth - leftWidth,
+        barHeight = 20;
+
+
+
+
+      function drawBarOnChart(iChart, iData, iName, textOffset = -3) {
+        var x = d3.scale.linear()
+          .domain([0, d3.max(iData)])
+          .range([0, width]);
+
+        var bar = iChart.selectAll("g")
+          .data(iData)
+          .enter().append("g")
+          .attr("transform", function(d, i) {
+            return "translate(0," + i * barHeight + ")";
+          });
+
+        bar.append("rect")
+          .attr("x", leftWidth)
+          .attr("width", x)
+          .attr("height", barHeight - 1);
+
+        bar.append("text")
+          .attr("x", function(d) {
+            return leftWidth + x(d) + textOffset;
+          })
+          .attr("y", barHeight / 2)
+          .attr("dy", ".35em")
+          .text(function(d) {
+            return d.toFixed(2);
+          });
+
+        var label = iChart.selectAll("text.name")
+          .data(iName)
+          .enter().append("text")
+          .attr("transform", function(d, i) {
+            return "translate(0," + i * barHeight + ")";
+          })
+          .attr("x", leftWidth - 10)
+          .attr("y", barHeight / 2)
+          .attr("dy", ".35em")
+          .attr("text-anchor", "middle")
+          .attr('class', 'name')
+          .text(String);
+      }
+
+      // draw chart
+      var chartPerson = d3.select("#personly")
+        .attr("width", width + leftWidth)
+        .attr("height", barHeight * dataPerson.length);
+
+      drawBarOnChart(chartPerson, dataPerson, namePerson);
+
+
+      var monthlyData = entries.sumMonthly();
+
+      var chartMonth = d3.select("#monthly")
+        .attr("width", width + leftWidth)
+        .attr("height", barHeight * monthlyData[0].length);
+
+      drawBarOnChart(chartMonth, monthlyData[0], monthlyData[1]);
+
+
+      var weeklyData = entries.sumWeekly();
+
+      var chartWeek = d3.select("#weekly")
+        .attr("width", width + leftWidth)
+        .attr("height", barHeight * weeklyData[0].length);
+
+      drawBarOnChart(chartWeek, weeklyData[0], weeklyData[1]);
+
+
+
+
+      // go back to index button
+      document.getElementById("backBtn").onclick = function() {
+        window.location.href = '{{ url_for( 'index' ) }}'
+      }
+
+
+      // calculator
+      document.getElementById("id_threshold").value = 10000;
+      document.getElementById("id_start_date").value = new Date(2017, 3,8).toISOString().slice(0,10);
+      document.getElementById("id_end_date").value = new Date().toISOString().slice(0,10);
+
+
+      document.getElementById("calBtn").onclick = function() {
+        var dStart = parseStringDate(document.getElementById("id_start_date").value),
+            dEnd   = parseStringDate(document.getElementById("id_end_date").value),
+            shareFlag = document.getElementById("id_share").value,
+            personFlag = document.getElementById("id_person").value,
+            valThreshold = document.getElementById("id_threshold").value;
+        document.getElementById("id_result").value =
+            entries.sumBetween(dStart, dEnd, shareFlag, valThreshold, personFlag).toFixed(2);
+      }
+    </script>
+
+
+  </div>

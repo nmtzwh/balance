@@ -1,0 +1,129 @@
+<!doctype html>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='simplegrid.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='form.css') }}">
+
+<title>Where Money Goes</title>
+
+<div class=page>
+  <h1>WhereMoneyGoes</h1>
+  <div class=metanav>
+    <button type="button" id="delBtn">Delete</button>
+    <!-- <a href="{{ url_for('addCost') }}">add</a> -->
+  </div>
+  {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+  {% endfor %}
+
+  {% for entry in entries %}
+  <div class="grid grid-pad" id="form-wrapper" >
+     <form action="{{ url_for('changeOneEntry') }}" method="post">
+       <div class="col-2-3 input-field" style="display:none">
+         <input type="number" name="id" value={{entry.id}} />
+       </div>
+
+       <div class="col-2-3 input-field">
+         <input type="date" name="date" placeholder="日期" id="id_date" maxlength="128" value={{entry.date}} required/>
+       </div>
+
+       <div class="col-2-3 input-field">
+         <input type="number" step=0.01 name="cost" placeholder="金额" id="id_cost" maxlength="128" value={{entry.cost}} required/>
+       </div>
+
+       <div class="col-2-3 input-field">
+         <select name="class" placeholder="类型" id="id_category" >
+           <option value="日用品">日用品</option>
+
+           <option value="电子竞技">电子竞技</option>
+
+           <option value="交通">交通</option>
+           <option value="房租">房租</option>
+           <option value="社交">社交</option>
+           <option value="其他">其他</option>
+
+           <option value="食品">食品</option>
+
+         </select>
+       </div>
+
+       <div class="col-2-3 input-field">
+         <select name="location" placeholder="地点" id="id_loc">
+           <option value="99 Ranch">99 Ranch</option>
+
+           <option value="GameStop">GameStop</option>
+
+           <option value="Daiso">Daiso</option>
+           <option value="Safeway">Safeway</option>
+           <option value="Home">Home</option>
+           <option value="Amazon">Amazon</option>
+
+           <option value="PS4">PS4</option>
+
+           <option value="Other" selected>Other</option>
+
+         </select>
+       </div>
+
+       <div class="col-2-3 input-field">
+         <input type="text" name="comment" placeholder="备注" id="id_comment" maxlength="128" value={{entry.detail}} />
+       </div>
+       <div class="col-1-1">
+         <p></p>
+       </div>
+       <div class="col-1-3 input-field">
+         <input type="radio" id="id_share1" name="share" value="共享" checked="checked"/>
+         <label for="id_share1"><span><span></span></span>共享</label>
+         <input type="radio" id="id_share0" name="share" value="独享"/>
+         <label for="id_share0"><span><span></span></span>独享</label>
+       </div>
+
+       <div class="col-1-3 input-field">
+         <input type="radio" id="id_user1" name="user" value="user1" required/>
+         <label for="id_user1"><span><span></span></span>user1</label>
+         <input type="radio" id="id_user0" name="user" value="user0" required/>
+         <label for="id_user0"><span><span></span></span>user0</label>
+       </div>
+
+       <div class="col-1-1">
+         <p></p>
+       </div>
+
+
+       <div class="col-2-3 input-button">
+         <input type="submit" value="Confirm" />
+         <div class="ease"></div>
+       </div>
+     </form>
+   </div>
+      {{ entry.text|safe }}
+  {% else %}
+    <em>Error: No such record!</em>
+  {% endfor %}
+
+  <script>
+    {% for entry in entries %}
+      document.getElementById('id_category').value = "{{entry.class}}";
+      document.getElementById('id_loc').value = "{{entry.location}}";
+      if ("{{entry.share}}" == "共享"){
+        document.getElementById('id_share1').checked = true;
+      }else{
+        document.getElementById('id_share0').checked = true;
+      }
+      if ("{{entry.person}}" == "user1"){
+        document.getElementById('id_user1').checked = true;
+      }else{
+        document.getElementById('id_user0').checked = true;
+      }
+
+      // delete button
+      document.getElementById("delBtn").onclick = function(){
+        window.location.href='{{ url_for( 'deleteEntry' , id=entry.id ) }}'
+      }
+    {% endfor %}
+  </script>
+
+
+</div>

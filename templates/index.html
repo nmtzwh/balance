@@ -1,0 +1,217 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div id="chart_display">
+    <svg class="chart" id="personly"></svg>
+  </div>
+
+  <ul class=entries id="list_entries">
+  {% for entry in entries %}
+    <li>
+      <span style="width:35%">{{ entry.date|truncate(10, True, '') }}</span>
+      <span style="width:15%; text-align:right">{{ entry.cost }}</span>
+      <span style="width:20%; text-align:right">{{ entry.person }}</span>
+      <span style="width:20%; text-align:right">
+        <a href="{{url_for('detailPage',  id=entry.id)}}">Details</a>
+      </span>
+      {{ entry.text|safe }}
+  {% else %}
+    <li><em>Unbelievable.  No entries here so far</em>
+  {% endfor %}
+  </ul>
+
+  <div id="addModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+        <div class="grid grid-pad" id="form-wrapper">
+           <form action="{{ url_for('addCost') }}" method="post" >
+
+             <div class="col-1-2 input-field">
+               <input type="date" name="date" placeholder="日期" id="id_date" maxlength="128" required/>
+             </div>
+
+             <div class="col-1-1 input-field">
+               <input type="number" step=0.01 name="cost" placeholder="金额" id="id_cost" maxlength="128" required/>
+             </div>
+
+             <div class="col-1-2 input-field">
+               <select name="class" placeholder="类型" id="id_category">
+                 <option value="日用品">日用品</option>
+
+                 <option value="电子竞技">电子竞技</option>
+
+                 <option value="交通">交通</option>
+                 <option value="房租">房租</option>
+                 <option value="社交">社交</option>
+                 <option value="其他">其他</option>
+
+                 <option value="食品" selected>食品</option>
+
+               </select>
+             </div>
+
+             <div class="col-1-2 input-field">
+               <select name="location" placeholder="地点" id="id_loc">
+                 <option value="99 Ranch">99 Ranch</option>
+
+                 <option value="GameStop">GameStop</option>
+
+                 <option value="Daiso">Daiso</option>
+                 <option value="Safeway">Safeway</option>
+                 <option value="Home">Home</option>
+                 <option value="Amazon">Amazon</option>
+
+                 <option value="PS4">PS4</option>
+
+                 <option value="Other" selected>Other</option>
+
+               </select>
+             </div>
+
+             <div class="col-1-1 input-field">
+               <input type="text" name="comment" placeholder="备注" id="id_comment" maxlength="128"/>
+             </div>
+
+             <div class="col-1-2 input-field">
+               <input type="radio" id="id_share1" name="share" value="共享" checked="checked"/>
+               <label for="id_share1"><span><span></span></span>共享</label>
+               <input type="radio" id="id_share0" name="share" value="独享"/>
+               <label for="id_share0"><span><span></span></span>独享</label>
+             </div>
+
+             <div class="col-1-2 input-field">
+               <input type="radio" id="id_user1" name="user" value="user1" required/>
+               <label for="id_user1"><span><span></span></span>user1</label>
+               <input type="radio" id="id_user0" name="user" value="user0" required/>
+               <label for="id_user0"><span><span></span></span>user0</label>
+             </div>
+
+             <div class="col-1-1">
+               <p></p>
+             </div>
+
+
+             <div class="col-1-1 input-button">
+               <input type="submit" value="Confirm" />
+               <div class="ease"></div>
+             </div>
+           </form>
+         </div>
+    </div>
+
+  </div>
+
+
+  <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script>
+    // Get the modal
+    var modal = document.getElementById('addModal');
+
+    // Get the button that opens the modal
+    var btn = document.getElementById("addBtn");
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+      modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+          modal.style.display = "none";
+      }
+    }
+
+    Date.prototype.toDateInputValue = (function() {
+      var local = new Date(this);
+      local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+      return local.toJSON().slice(0,10);
+    });
+
+    document.getElementById('id_date').value = new Date().toDateInputValue();
+
+
+    // data visualization
+    var entries = {{ data|safe }};
+
+    var data = [0, 0, 0, 0];
+    var names = ['ShaP', 'ShaZ', 'PriP', 'PriZ'];
+
+    for (var entry of entries) {
+      // console.log(entry);
+      if (entry[3] == "共享"){
+        if (entry[4] == "user1") {
+          data[0] += Number(entry[2]);
+        }else{
+          data[1] += Number(entry[2]);
+        }
+      }else{
+        if ( entry[4] == "user1"){
+          data[2] += Number(entry[2]);
+        }else{
+          data[3] += Number(entry[2]);
+        }
+      }
+    }
+
+    // console.log(data);
+
+
+    var leftWidth = 50,
+        width = document.getElementById('list_entries').offsetWidth - leftWidth,
+        barHeight = 20;
+
+    var x = d3.scale.linear()
+        .domain([0, d3.max(data)])
+        .range([0, width]);
+
+    var chart = d3.select(".chart")
+        .attr("width", width + leftWidth)
+        .attr("height", barHeight * data.length);
+
+    var bar = chart.selectAll("g")
+        .data(data)
+      .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+    bar.append("rect")
+        .attr("x", leftWidth)
+        .attr("width", x)
+        .attr("height", barHeight - 1);
+
+    bar.append("text")
+        .attr("x", function(d) { return leftWidth + x(d) - 3; })
+        .attr("y", barHeight / 2)
+        .attr("dy", ".35em")
+        .text(function(d) { return d.toFixed(2); });
+
+    var label = chart.selectAll("text.name")
+      .data(names)
+      .enter().append("text")
+      .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; })
+      .attr("x", leftWidth / 2)
+      .attr("y", barHeight / 2 )
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .attr('class', 'name')
+      .text(String);
+
+      // click chart to details
+      var divChart = document.getElementById('chart_display');
+      divChart.onclick = function() {
+        window.location.href='{{ url_for( 'displaySummary') }}'
+      };
+
+
+  </script>
+
+{% endblock %}
